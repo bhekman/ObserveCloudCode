@@ -5,37 +5,58 @@ Parse.Cloud.define("hello", function(request, response) {
   response.success("Hello world!");
 });
 
+// Test function from https://parse.com/questions/calling-a-parsecloud-function-from-android
+Parse.Cloud.define("test", function(request, response) {
+  var text = "hello world";
+  var jsonObject = {
+    "answer": text
+  };
 
-// WIP: to fetch places based on lat/lon
+  response.success(jsonObject);
+});
+
+
+// Calls the Google Places API on behalf of the app.
+// Returns the status and text portions of the httpResponse as a Map<String, Object>.
+// TODO: Return only the stuff that we need in an array format.
 places_place_search_url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json";
 places_api_key = "AIzaSyBy2f5Fq5y3neWyIz1jRXxvDaH_HeVar1o";
 places_radius = 50;
 Parse.Cloud.define("get_places", function(request, response) {
 
   var place_search_params = "location="
-    + request.latitude
+    + String(request.params.latitude)
     + "%2C"
-    + request.longitude
+    + String(request.params.longitude)
+    + "&types=establishment"
+    + "&opennow=true"
     + "&radius="
-    + places_radius
+    + String(places_radius)
     + "&key="
     + places_api_key;
 
+  // combined manually because httpRequest() was ignoring the params.
+  var full_url = String(places_place_search_url + "?" + place_search_params);
+  console.log("Full URL is: " + full_url);
+
   Parse.Cloud.httpRequest({
       method: "GET",
-      url: places_place_search_url,
-      params: place_search_params,
+      url: full_url,
       success: function(httpResponse) {
-        response(httpResponse.text);
+        console.log("httpResponse text: " + httpResponse.text);
+
+        var jsonObject = {};
+        jsonObject["status"] = httpResponse.status;
+        jsonObject["text"] = httpResponse.text;
+        response.success(jsonObject);
       },
       error: function(httpResponse) {
-        response('Request failed with response code ' + httpResponse.status)
+        console.error(httpResponse.text);
+
+        var jsonObject = {};
+        jsonObject["status"] = httpResponse.status;
+        jsonObject["text"] = httpResponse.text;
+        response.error(jsonObject);
       }
   });
-
-  //response.success("Query will be: ="
-    //+ request.latitude
-    //+ "%2C"
-    //+ request.longitude
-    //+ "&radius=50&key=AIzaSyBy2f5Fq5y3neWyIz1jRXxvDaH_HeVar1o");
 });
