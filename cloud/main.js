@@ -1,62 +1,50 @@
+// -----------------------------------------------------
+// Backend code for Observe.
+//
+// Written by Brad Hekman
+// Last Updated: 3/18/15
+// -----------------------------------------------------
 
-// Use Parse.Cloud.define to define as many cloud functions as you want.
-// For example:
-Parse.Cloud.define("hello", function(request, response) {
-  response.success("Hello world!");
-});
-
-// Test function from https://parse.com/questions/calling-a-parsecloud-function-from-android
-Parse.Cloud.define("test", function(request, response) {
-  var text = "hello world";
-  var jsonObject = {
-    "answer": text
-  };
-
-  response.success(jsonObject);
-});
-
-
-// Calls the Google Places API on behalf of the app.
+// Calls the Google Places API on behalf of the app (https://developers.google.com/places/documentation/search).
 // Returns the status and text portions of the httpResponse as a Map<String, Object>.
-// TODO: Return only the stuff that we need in an array format.
+// TODO: Add in keyword filtering
+
+// Google Places call constant parameters
 places_place_search_url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json";
 places_api_key = "AIzaSyBy2f5Fq5y3neWyIz1jRXxvDaH_HeVar1o";
+places_types = "establishment"; // TODO: does this exclude any places that we care about?
+places_opennow = "true"; 
+places_rankby = "prominence"; // this is default
 places_radius = 50;
+
+// Function definition
 Parse.Cloud.define("get_places", function(request, response) {
 
-  var place_search_params = "location="
-    + String(request.params.latitude)
-    + "%2C"
-    + String(request.params.longitude)
-    + "&types=establishment"
-    + "&opennow=true"
-    + "&radius="
-    + String(places_radius)
-    + "&key="
-    + places_api_key;
+  var place_search_params = 
+    "location=" + String(request.params.latitude) + "," + String(request.params.longitude)
+    + "&key=" + String(places_api_key)
+    + "&types=" + String(places_types)
+    + "&opennow=" + String(places_opennow)
+    + "&rankby=" + String(places_rankby)
+    + "&radius=" + String(places_radius);
 
-  // combined manually because httpRequest() was ignoring the params.
   var full_url = String(places_place_search_url + "?" + place_search_params);
   console.log("Full URL is: " + full_url);
 
+  var result = {};
   Parse.Cloud.httpRequest({
       method: "GET",
       url: full_url,
       success: function(httpResponse) {
-        console.log("httpResponse text: " + httpResponse.text);
-
-        var jsonObject = {};
-        jsonObject["status"] = httpResponse.status;
-        jsonObject["text"] = httpResponse.text;
-        response.success(jsonObject);
+        console.log("success — httpResponse text: " + httpResponse.text);
+        result["status"] = httpResponse.status;
+        result["text"] = httpResponse.text;
+        response.success(result);
       },
       error: function(httpResponse) {
         console.error(httpResponse.text);
-
-        var jsonObject = {};
-        jsonObject["status"] = httpResponse.status;
-        jsonObject["text"] = httpResponse.text;
-        response.error(jsonObject);
+        result["status"] = httpResponse.status;
+        response.error(result);
       }
   });
 });
