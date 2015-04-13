@@ -62,6 +62,9 @@ Parse.Cloud.define("get_places", function(request, response) {
 //         );
 Parse.Cloud.define("get_email", function(request, response) {
   var result = {};
+  result["has_email"] = false;
+  result["email"] = "";
+
   try {
     console.log(request);
 
@@ -71,27 +74,22 @@ Parse.Cloud.define("get_email", function(request, response) {
       .equalTo("place_id", request.params.place_id)
       .find({
         success: function(object) {
-
           console.log(object);
+
           if (object && object[0] && object[0].get("email")!="") {
             result["has_email"] = true;
             result["email"] = object[0].get("email");
-          } else {
-            result["has_email"] = false;
-            result["email"] = "";
           }
           response.success(result);
         },
 
         error: function(object, error) {
-          throw ".find() had an error.";
+          console.error(error);
+          response.error(result);
         }
     });
   } catch (e) {
-    console.log('catch');
-    console.error(e);
-    result["has_email"] = false;
-    result["email"] = "";
-    response.success(result);
+    console.error(e)
+    response.error(result);
   }
 });
