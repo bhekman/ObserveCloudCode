@@ -15,9 +15,14 @@ places_api_key = "AIzaSyBy2f5Fq5y3neWyIz1jRXxvDaH_HeVar1o";
 places_types = "establishment"; // TODO: does this exclude any places that we care about?
 places_opennow = "true"; 
 places_rankby = "prominence"; // this is default
-places_radius = 50;
+places_radius = 150;
 
-// Function definition
+// Arguments: latitude, longitude
+// Usage:  ParseCloud.callFunctionInBackground(
+//           "get_places",
+//           {"latitude": latitude, "longitude": longitude},
+//           callback
+//         );
 Parse.Cloud.define("get_places", function(request, response) {
 
   var place_search_params = 
@@ -47,4 +52,17 @@ Parse.Cloud.define("get_places", function(request, response) {
         response.error(result);
       }
   });
+});
+
+// Arguments: place_id (google)
+// Usage:  ParseCloud.callFunctionInBackground(
+//           "get_places",
+//           {"place_id", place_id},
+//           callback
+//         );
+Parse.Cloud.define("get_email", function(request, response) {
+  console.log(request.place_id);
+  // TODO
+  result["email"] = "test@gmail.com";
+  response.success(result);
 });
