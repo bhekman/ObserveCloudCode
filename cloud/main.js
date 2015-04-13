@@ -61,8 +61,37 @@ Parse.Cloud.define("get_places", function(request, response) {
 //           callback
 //         );
 Parse.Cloud.define("get_email", function(request, response) {
-  console.log(request.place_id);
-  // TODO
-  result["email"] = "test@gmail.com";
-  response.success(result);
+  var result = {};
+  try {
+    console.log(request);
+
+    var PlaceClass = Parse.Object.extend("Place");
+    var query = new Parse.Query(PlaceClass);
+    query
+      .equalTo("place_id", request.params.place_id)
+      .find({
+        success: function(object) {
+
+          console.log(object);
+          if (object && object[0] && object[0].get("email")!="") {
+            result["has_email"] = true;
+            result["email"] = object[0].get("email");
+          } else {
+            result["has_email"] = false;
+            result["email"] = "";
+          }
+          response.success(result);
+        },
+
+        error: function(object, error) {
+          throw ".find() had an error.";
+        }
+    });
+  } catch (e) {
+    console.log('catch');
+    console.error(e);
+    result["has_email"] = false;
+    result["email"] = "";
+    response.success(result);
+  }
 });
