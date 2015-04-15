@@ -8,14 +8,15 @@
 // Calls the Google Places API on behalf of the app (https://developers.google.com/places/documentation/search).
 // Returns the status and text portions of the httpResponse as a Map<String, Object>.
 // TODO: Add in keyword filtering
+// TODO: Add in email sending
 
 // Google Places call constant parameters
 places_place_search_url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json";
 places_api_key = "AIzaSyBy2f5Fq5y3neWyIz1jRXxvDaH_HeVar1o";
-places_types = "establishment"; // TODO: does this exclude any places that we care about?
+places_types = "establishment";
 places_opennow = "true"; 
 places_rankby = "prominence"; // this is default
-places_radius = 150;
+places_radius = 200;
 
 // Arguments: latitude, longitude
 // Usage:  ParseCloud.callFunctionInBackground(
